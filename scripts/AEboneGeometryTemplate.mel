@@ -1,0 +1,47 @@
+global proc AEboneGeometryTemplate(string $nodeName)
+{
+    
+    editorTemplate -beginScrollLayout;
+        
+        editorTemplate -beginLayout "Bone Geometry Attributes" -collapse false;
+		
+			editorTemplate -addControl "width";
+			editorTemplate -addControl "height";
+			editorTemplate -addControl "length";
+			editorTemplate -addControl "taper";
+			editorTemplate -addControl "sideFins";
+			editorTemplate -addControl "sideFinsSize";
+			editorTemplate -addControl "sideFinsStartTaper";
+			editorTemplate -addControl "sideFinsEndTaper";
+			editorTemplate -addControl "frontFin";
+			editorTemplate -addControl "frontFinSize";
+			editorTemplate -addControl "frontFinStartTaper";
+			editorTemplate -addControl "frontFinEndTaper";
+			editorTemplate -addControl "backFin";
+			editorTemplate -addControl "backFinSize";
+			editorTemplate -addControl "backFinStartTaper";
+			editorTemplate -addControl "backFinEndTaper";
+        
+        editorTemplate -endLayout;
+		
+		editorTemplate -beginLayout "Object Transform Attributes" -collapse false;
+            
+            editorTemplate -addControl "localPosition";
+			editorTemplate -addControl "localRotate";
+			editorTemplate -addControl "localScale";
+        
+        editorTemplate -endLayout;
+		
+		editorTemplate -suppress "objectMatrix";
+		editorTemplate -suppress "objectInverseMatrix";
+		editorTemplate -suppress "objectWorldMatrix";
+		editorTemplate -suppress "objectWorldInverseMatrix";
+		
+		AElocatorInclude $nodeName;
+        AEdependNodeTemplate $nodeName;
+        
+        editorTemplate -addExtraControls;
+        
+    editorTemplate -endScrollLayout;
+    
+}
