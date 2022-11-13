@@ -215,18 +215,18 @@ It is invalid to pull data from the Maya dependency graph in the draw callback m
 	// Compute mesh points
 	//
 	MMatrix baseMatrix = Drawable::createScaleMatrix(boneGeometryData->width, boneGeometryData->height, boneGeometryData->width);
-	MMatrix taperMatrix = Drawable::createScaleMatrix(boneGeometryData->length + 1.0, 1.0 - boneGeometryData->taper, 1.0 - boneGeometryData->taper);
+	MMatrix taperMatrix = Drawable::createScaleMatrix((boneGeometryData->length * 2.0), (1.0 - boneGeometryData->taper), (1.0 - boneGeometryData->taper));
 
 	MPointArray points = MPointArray(9, MPoint::origin);
 	points[0] = MPoint(0.0, 0.0, 0.0);
-	points[1] = MPoint(1.0, -1.0, 1.0) * baseMatrix * boneGeometryData->objectMatrix;
-	points[2] = MPoint(1.0, 1.0, 1.0) * baseMatrix * boneGeometryData->objectMatrix;
-	points[3] = MPoint(1.0, 1.0, -1.0) * baseMatrix * boneGeometryData->objectMatrix;
-	points[4] = MPoint(1.0, -1.0, -1.0) * baseMatrix * boneGeometryData->objectMatrix;
-	points[5] = MPoint(1.0, -1.0, 1.0) * taperMatrix * boneGeometryData->objectMatrix;
-	points[6] = MPoint(1.0, 1.0, 1.0) * taperMatrix * boneGeometryData->objectMatrix;
-	points[7] = MPoint(1.0, 1.0, -1.0) * taperMatrix * boneGeometryData->objectMatrix;
-	points[8] = MPoint(1.0, -1.0, -1.0) * taperMatrix * boneGeometryData->objectMatrix;
+	points[1] = MPoint(0.5, -0.5, 0.5) * baseMatrix * boneGeometryData->objectMatrix;
+	points[2] = MPoint(0.5, 0.5, 0.5) * baseMatrix * boneGeometryData->objectMatrix;
+	points[3] = MPoint(0.5, 0.5, -0.5) * baseMatrix * boneGeometryData->objectMatrix;
+	points[4] = MPoint(0.5, -0.5, -0.5) * baseMatrix * boneGeometryData->objectMatrix;
+	points[5] = MPoint(0.5, -0.5, 0.5) * taperMatrix * boneGeometryData->objectMatrix;
+	points[6] = MPoint(0.5, 0.5, 0.5) * taperMatrix * boneGeometryData->objectMatrix;
+	points[7] = MPoint(0.5, 0.5, -0.5) * taperMatrix * boneGeometryData->objectMatrix;
+	points[8] = MPoint(0.5, -0.5, -0.5) * taperMatrix * boneGeometryData->objectMatrix;
 
 	// Create mesh data
 	//
