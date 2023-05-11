@@ -53,7 +53,7 @@ BoneGeometry::BoneGeometry()
 Constructor.
 */
 {
-
+	
 	this->data = new BoneGeometryData();
 
 };
@@ -65,7 +65,7 @@ Destructor.
 */
 {
 
-	this->data = nullptr;
+	delete this->data;
 
 };
 
@@ -105,26 +105,15 @@ Only these values should be used when performing computations!
 		// Get values from handles
 		//
 		MVector position = localPositionHandle.asVector();
-		double3& rotation = localRotateHandle.asDouble3();
-		double3& scale = localScaleHandle.asDouble3();
+		MVector rotation = localRotateHandle.asVector();
+		MVector scale = localScaleHandle.asVector();
 
-		// Define transform matrix
-		//
-		MTransformationMatrix transform = MTransformationMatrix();
+		MMatrix positionMatrix = Drawable::createPositionMatrix(position);
+		MMatrix rotateMatrix = Drawable::createRotationMatrix(rotation);
+		MMatrix scaleMatrix = Drawable::createScaleMatrix(scale);
 
-		status = transform.setTranslation(position, MSpace::kTransform);
-		CHECK_MSTATUS_AND_RETURN_IT(status);
-
-		status = transform.setRotation(rotation, MTransformationMatrix::RotationOrder::kXYZ);
-		CHECK_MSTATUS_AND_RETURN_IT(status);
-
-		status = transform.setScale(scale, MSpace::kTransform);
-		CHECK_MSTATUS_AND_RETURN_IT(status);
-
-		// Compose object matrix
-		//
-		MMatrix objectMatrix = transform.asMatrix();
-		MMatrix objectInverseMatrix = transform.asMatrixInverse();
+		MMatrix objectMatrix = scaleMatrix * rotateMatrix * positionMatrix;
+		MMatrix objectInverseMatrix = objectMatrix.inverse();
 
 		// Get output data handles
 		//
@@ -340,7 +329,13 @@ Another use for this method is to impose attribute limits.
 	if (isLocalPosition)
 	{
 
-		if (attribute == BoneGeometry::localPositionX)
+		if (attribute == BoneGeometry::localPosition)
+		{
+
+			this->data->localPosition = handle.asVector();
+
+		}
+		else if (attribute == BoneGeometry::localPositionX)
 		{
 
 			this->data->localPosition.x = handle.asDistance().asCentimeters();
@@ -366,7 +361,13 @@ Another use for this method is to impose attribute limits.
 	else if (isLocalRotation)
 	{
 
-		if (attribute == BoneGeometry::localRotateX)
+		if (attribute == BoneGeometry::localRotate)
+		{
+
+			this->data->localRotate = handle.asVector();
+
+		}
+		else if (attribute == BoneGeometry::localRotateX)
 		{
 
 			this->data->localRotate.x = handle.asAngle().asRadians();
@@ -392,7 +393,13 @@ Another use for this method is to impose attribute limits.
 	else if (isLocalScale)
 	{
 
-		if (attribute == BoneGeometry::localScaleX)
+		if (attribute == BoneGeometry::localScale)
+		{
+
+			this->data->localScale = handle.asVector();
+
+		}
+		else if (attribute == BoneGeometry::localScaleX)
 		{
 
 			this->data->localScale.x = handle.asDistance().asCentimeters();
@@ -578,15 +585,13 @@ Supplying a bounding box will make selection calculation more efficient!
 */
 {
 
-	// Create unit scaled bounding box
-	//
-	MPoint corner1(0.0, -this->data->height * 0.5, -this->data->width * 0.5);  // x = length, y = height, z = width
-	corner1 *= this->data->objectMatrix;
+	MPoint corner1 = MPoint(0.0, -this->data->height * 0.5, -this->data->width * 0.5);  // x = length, y = height, z = width
+	MPoint corner2 = MPoint(this->data->length, this->data->height * 0.5, this->data->width * 0.5);  // x = length, y = height, z = width
 
-	MPoint corner2(this->data->length, this->data->height * 0.5, this->data->width * 0.5);  // x = length, y = height, z = width
-	corner2 *= this->data->objectMatrix;
+	MBoundingBox boundingBox = MBoundingBox(corner1, corner2);
+	boundingBox.transformUsing(this->data->objectMatrix);
 
-	return MBoundingBox(corner1, corner2);
+	return boundingBox;
 
 };
 
@@ -630,7 +635,6 @@ Use this function to define any static attributes.
 	CHECK_MSTATUS_AND_RETURN_IT(status);
 
 	CHECK_MSTATUS(fnUnitAttr.setInternal(true));
-	CHECK_MSTATUS(fnUnitAttr.setAffectsWorldSpace(true));
 	CHECK_MSTATUS(fnUnitAttr.addToCategory(BoneGeometry::localPositionCategory));
 
 	// Edit ".localPositionY" attribute
@@ -639,7 +643,6 @@ Use this function to define any static attributes.
 	CHECK_MSTATUS_AND_RETURN_IT(status);
 
 	CHECK_MSTATUS(fnUnitAttr.setInternal(true));
-	CHECK_MSTATUS(fnUnitAttr.setAffectsWorldSpace(true));
 	CHECK_MSTATUS(fnUnitAttr.addToCategory(BoneGeometry::localPositionCategory));
 
 	// Edit ".localPositionZ" attribute
@@ -648,8 +651,15 @@ Use this function to define any static attributes.
 	CHECK_MSTATUS_AND_RETURN_IT(status);
 
 	CHECK_MSTATUS(fnUnitAttr.setInternal(true));
-	CHECK_MSTATUS(fnUnitAttr.setAffectsWorldSpace(true));
 	CHECK_MSTATUS(fnUnitAttr.addToCategory(BoneGeometry::localPositionCategory));
+
+	// Edit ".localPosition" attribute
+	//
+	status = fnNumericAttr.setObject(BoneGeometry::localPosition);
+	CHECK_MSTATUS_AND_RETURN_IT(status);
+
+	CHECK_MSTATUS(fnNumericAttr.setInternal(true));
+	CHECK_MSTATUS(fnNumericAttr.addToCategory(BoneGeometry::localPositionCategory));
 
 	// Define ".localRotateX" attribute
 	//
@@ -658,7 +668,6 @@ Use this function to define any static attributes.
 
 	CHECK_MSTATUS(fnUnitAttr.setInternal(true));
 	CHECK_MSTATUS(fnUnitAttr.setChannelBox(true));
-	CHECK_MSTATUS(fnUnitAttr.setAffectsWorldSpace(true));
 	CHECK_MSTATUS(fnUnitAttr.addToCategory(BoneGeometry::localRotationCategory));
 
 	// Define ".localRotateY" attribute
@@ -668,7 +677,6 @@ Use this function to define any static attributes.
 
 	CHECK_MSTATUS(fnUnitAttr.setInternal(true));
 	CHECK_MSTATUS(fnUnitAttr.setChannelBox(true));
-	CHECK_MSTATUS(fnUnitAttr.setAffectsWorldSpace(true));
 	CHECK_MSTATUS(fnUnitAttr.addToCategory(BoneGeometry::localRotationCategory));
 
 	// Define ".localRotateZ" attribute
@@ -678,7 +686,6 @@ Use this function to define any static attributes.
 
 	CHECK_MSTATUS(fnUnitAttr.setInternal(true));
 	CHECK_MSTATUS(fnUnitAttr.setChannelBox(true));
-	CHECK_MSTATUS(fnUnitAttr.setAffectsWorldSpace(true));
 	CHECK_MSTATUS(fnUnitAttr.addToCategory(BoneGeometry::localRotationCategory));
 
 	// Define ".localRotate"
@@ -686,13 +693,15 @@ Use this function to define any static attributes.
 	BoneGeometry::localRotate = fnNumericAttr.create("localRotate", "lor", BoneGeometry::localRotateX, BoneGeometry::localRotateY, BoneGeometry::localRotateZ, &status);
 	CHECK_MSTATUS_AND_RETURN_IT(status);
 
+	CHECK_MSTATUS(fnNumericAttr.setInternal(true));
+	CHECK_MSTATUS(fnNumericAttr.addToCategory(BoneGeometry::localRotationCategory));
+
 	// Edit ".localScaleX" attribute
 	//
 	status = fnUnitAttr.setObject(BoneGeometry::localScaleX);
 	CHECK_MSTATUS_AND_RETURN_IT(status);
 
 	CHECK_MSTATUS(fnUnitAttr.setInternal(true));
-	CHECK_MSTATUS(fnUnitAttr.setAffectsWorldSpace(true));
 	CHECK_MSTATUS(fnUnitAttr.addToCategory(BoneGeometry::localScaleCategory));
 
 	// Edit ".localScaleY" attribute
@@ -701,7 +710,6 @@ Use this function to define any static attributes.
 	CHECK_MSTATUS_AND_RETURN_IT(status);
 
 	CHECK_MSTATUS(fnUnitAttr.setInternal(true));
-	CHECK_MSTATUS(fnUnitAttr.setAffectsWorldSpace(true));
 	CHECK_MSTATUS(fnUnitAttr.addToCategory(BoneGeometry::localScaleCategory));
 
 	// Edit ".localScaleZ" attribute
@@ -710,9 +718,16 @@ Use this function to define any static attributes.
 	CHECK_MSTATUS_AND_RETURN_IT(status);
 
 	CHECK_MSTATUS(fnUnitAttr.setInternal(true));
-	CHECK_MSTATUS(fnUnitAttr.setAffectsWorldSpace(true));
 	CHECK_MSTATUS(fnUnitAttr.addToCategory(BoneGeometry::localScaleCategory));
 
+	// Edit ".localScale" attribute
+	//
+	status = fnNumericAttr.setObject(BoneGeometry::localScale);
+	CHECK_MSTATUS_AND_RETURN_IT(status);
+
+	CHECK_MSTATUS(fnNumericAttr.setInternal(true));
+	CHECK_MSTATUS(fnNumericAttr.addToCategory(BoneGeometry::localScaleCategory));
+	
 	// ".width" attribute
 	//
 	BoneGeometry::width = fnNumericAttr.create("width", "w", MFnNumericData::kDouble, 1.0, &status);

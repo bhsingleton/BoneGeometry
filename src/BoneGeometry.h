@@ -1,5 +1,5 @@
-#ifndef _BONE_GEOMETRY
-#define _BONE_GEOMETRY
+#ifndef _BONE_GEOMETRY_NODE
+#define _BONE_GEOMETRY_NODE
 //
 // File: BoneGeometry.h
 //
@@ -128,5 +128,4 @@ protected:
 			BoneGeometryData*	data;
 
 };
-
 #endif

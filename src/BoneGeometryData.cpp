@@ -14,7 +14,7 @@ Constructor.
 {
 
 	this->localPosition = MVector(0.0, 0.0, 0.0);
-	this->localRotate = MEulerRotation(0.0, 0.0, 0.0);
+	this->localRotate = MVector(0.0, 0.0, 0.0);
 	this->localScale = MVector(1.0, 1.0, 1.0);
 	this->objectMatrix = MMatrix::identity;
 
@@ -47,7 +47,48 @@ Constructor.
 BoneGeometryData::~BoneGeometryData() {};
 
 
-MStatus BoneGeometryData::cacheWireColor(const MDagPath& dagPath)
+BoneGeometryData& BoneGeometryData::operator=(const BoneGeometryData* src)
+/**
+Assignment operator.
+
+@param src: Point helper data to be copied.
+@return: Self.
+*/
+{
+
+	this->localPosition = src->localPosition;
+	this->localRotate = src->localRotate;
+	this->localScale = src->localScale;
+
+	this->width = src->width;
+	this->height = src->height;
+	this->length = src->length;
+	this->taper = src->taper;
+
+	this->sideFins = src->sideFins;
+	this->sideFinsSize = src->sideFinsSize;
+	this->sideFinsStartTaper = src->sideFinsStartTaper;
+	this->sideFinsEndTaper = src->sideFinsEndTaper;
+
+	this->frontFin = src->frontFin;
+	this->frontFinSize = src->frontFinSize;
+	this->frontFinStartTaper = src->frontFinStartTaper;
+	this->frontFinEndTaper = src->frontFinEndTaper;
+
+	this->backFin = src->backFin;
+	this->backFinSize = src->backFinSize;
+	this->backFinStartTaper = src->backFinStartTaper;
+	this->backFinEndTaper = src->backFinEndTaper;
+
+	this->wireColor = src->wireColor;
+	this->depthPriority = src->depthPriority;
+
+	return *this;
+
+};
+
+
+MStatus BoneGeometryData::copyWireColor(const MDagPath& dagPath)
 /**
 Caches the wire-colour from the supplied dag path.
 
@@ -56,13 +97,29 @@ Caches the wire-colour from the supplied dag path.
 */
 {
 
+	MStatus status;
+
+	// Check if path is valid
+	//
+	bool isValid = dagPath.isValid(&status);
+	CHECK_MSTATUS_AND_RETURN_IT(status);
+
+	if (!isValid)
+	{
+
+		return MS::kFailure;
+
+	}
+
+	// Evaluate wire color
+	//
 	this->wireColor = MHWRender::MGeometryUtilities::wireframeColor(dagPath);
 	return MS::kSuccess;
 
 };
 
 
-MStatus BoneGeometryData::cacheDepthPriority(const MDagPath& dagPath)
+MStatus BoneGeometryData::copyDepthPriority(const MDagPath& dagPath)
 /**
 Caches the depth priority from the supplied dag path.
 
@@ -71,12 +128,25 @@ Caches the depth priority from the supplied dag path.
 */
 {
 
+	MStatus status;
 
-	// Get correct depth priority
+	// Check if path is valid
 	//
-	MHWRender::DisplayStatus status = MHWRender::MGeometryUtilities::displayStatus(dagPath);
+	bool isValid = dagPath.isValid(&status);
+	CHECK_MSTATUS_AND_RETURN_IT(status);
 
-	switch (status)
+	if (!isValid)
+	{
+
+		return MS::kFailure;
+
+	}
+
+	// Evaluate display status
+	//
+	MHWRender::DisplayStatus displayStatus = MHWRender::MGeometryUtilities::displayStatus(dagPath);
+
+	switch (displayStatus)
 	{
 
 	case MHWRender::DisplayStatus::kActiveComponent:
@@ -105,7 +175,7 @@ Updates the internal object-matrix.
 {
 
 	MMatrix positionMatrix = Drawable::createPositionMatrix(this->localPosition);
-	MMatrix rotateMatrix = this->localRotate.asMatrix();
+	MMatrix rotateMatrix = Drawable::createRotationMatrix(this->localRotate);
 	MMatrix scaleMatrix = Drawable::createScaleMatrix(this->localScale);
 
 	this->objectMatrix = scaleMatrix * rotateMatrix * positionMatrix;

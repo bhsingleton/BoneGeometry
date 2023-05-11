@@ -40,43 +40,45 @@ class BoneGeometryData : public MUserData
 
 public:
 
-							BoneGeometryData();
-	virtual					~BoneGeometryData();
+								BoneGeometryData();
+	virtual						~BoneGeometryData();
 
-	virtual	MStatus			cacheWireColor(const MDagPath& objPath);
-	virtual	MStatus			cacheDepthPriority(const MDagPath& dagPath);
+	virtual	BoneGeometryData&	operator=(const BoneGeometryData* src);
 
-	virtual	void			dirtyObjectMatrix();
+	virtual	MStatus				copyWireColor(const MDagPath& dagPath);
+	virtual	MStatus				copyDepthPriority(const MDagPath& dagPath);
+
+	virtual	void				dirtyObjectMatrix();
 
 public:
 			
-			MVector			localPosition;
-			MEulerRotation	localRotate;
-			MVector			localScale;
-			MMatrix			objectMatrix;
+			MVector				localPosition;
+			MVector				localRotate;
+			MVector				localScale;
+			MMatrix				objectMatrix;
 
-			double			width;
-			double			height;
-			double			length;
-			double			taper;
+			double				width;
+			double				height;
+			double				length;
+			double				taper;
 
-			bool			sideFins;
-			double			sideFinsSize;
-			double			sideFinsStartTaper;
-			double			sideFinsEndTaper;
+			bool				sideFins;
+			double				sideFinsSize;
+			double				sideFinsStartTaper;
+			double				sideFinsEndTaper;
 
-			bool			frontFin;
-			double			frontFinSize;
-			double			frontFinStartTaper;
-			double			frontFinEndTaper;
+			bool				frontFin;
+			double				frontFinSize;
+			double				frontFinStartTaper;
+			double				frontFinEndTaper;
 
-			bool			backFin;
-			double			backFinSize;
-			double			backFinStartTaper;
-			double			backFinEndTaper;
+			bool				backFin;
+			double				backFinSize;
+			double				backFinStartTaper;
+			double				backFinEndTaper;
 
-			MColor			wireColor;
-			unsigned int	depthPriority;
+			MColor				wireColor;
+			unsigned int		depthPriority;
 
 };
 

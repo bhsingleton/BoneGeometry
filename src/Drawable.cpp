@@ -364,6 +364,48 @@ Returns a position matrix from the supplied point.
 };
 
 
+MMatrix Drawable::createRotationMatrix(const MVector& radians, const MEulerRotation::RotationOrder order)
+/**
+Returns a rotation matrix from the supplied radians and rotation order.
+
+@param radians: The angles as radians.
+@return: The rotation matrix.
+*/
+{
+
+	return MEulerRotation(radians, order).asMatrix();
+
+};
+
+
+MMatrix Drawable::createRotationMatrix(const MVector& radians, const MTransformationMatrix::RotationOrder order)
+/**
+Returns a rotation matrix from the supplied radians and rotation order.
+
+@param radians: The angles as radians.
+@return: The rotation matrix.
+*/
+{
+
+	return Drawable::createRotationMatrix(radians, MEulerRotation::RotationOrder(order - 1));
+
+};
+
+
+MMatrix Drawable::createRotationMatrix(const MVector& radians)
+/**
+Returns a rotation matrix from the supplied radians.
+
+@param radians: The angles as radians.
+@return: The rotation matrix.
+*/
+{
+
+	return Drawable::createRotationMatrix(radians, MEulerRotation::kXYZ);
+
+};
+
+
 MMatrix Drawable::createScaleMatrix(const double x, const double y, const double z)
 /**
 Returns a scale matrix from the supplied x, y and z values.

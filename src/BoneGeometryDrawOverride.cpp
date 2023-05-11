@@ -199,34 +199,42 @@ It is invalid to pull data from the Maya dependency graph in the draw callback m
 	//
 	BoneGeometryData* boneGeometryData = dynamic_cast<BoneGeometryData*>(userData);
 
-	if (!boneGeometryData)
+	if (boneGeometryData == nullptr)
 	{
 
-		boneGeometryData = this->boneGeometry->getUserData();
+		boneGeometryData = new BoneGeometryData();
 
 	}
 
 	// Cache internal values
 	//
-	boneGeometryData->dirtyObjectMatrix();
-	boneGeometryData->cacheWireColor(objPath);
-	boneGeometryData->cacheDepthPriority(objPath);
+	*boneGeometryData = this->boneGeometry->getUserData();
+	boneGeometryData->copyWireColor(objPath);
+	boneGeometryData->copyDepthPriority(objPath);
 
 	// Compute mesh points
 	//
-	MMatrix baseMatrix = Drawable::createScaleMatrix(boneGeometryData->width, boneGeometryData->height, boneGeometryData->width);
-	MMatrix taperMatrix = Drawable::createScaleMatrix((boneGeometryData->length * 2.0), (1.0 - boneGeometryData->taper), (1.0 - boneGeometryData->taper));
+	double width = boneGeometryData->width;
+	double height = boneGeometryData->height;
+	double taper = boneGeometryData->taper;
+
+	double minLength = (width > height) ? width : height;
+	double length = boneGeometryData->length > minLength ? boneGeometryData->length : minLength;
+
+	MMatrix baseMatrix = Drawable::createScaleMatrix(width, height, width);
+	MMatrix taperMatrix = Drawable::createScaleMatrix((length * 2.0), (1.0 - taper), (1.0 - taper));
+	MMatrix objectMatrix = boneGeometryData->objectMatrix;
 
 	MPointArray points = MPointArray(9, MPoint::origin);
 	points[0] = MPoint(0.0, 0.0, 0.0);
-	points[1] = MPoint(0.5, -0.5, 0.5) * baseMatrix * boneGeometryData->objectMatrix;
-	points[2] = MPoint(0.5, 0.5, 0.5) * baseMatrix * boneGeometryData->objectMatrix;
-	points[3] = MPoint(0.5, 0.5, -0.5) * baseMatrix * boneGeometryData->objectMatrix;
-	points[4] = MPoint(0.5, -0.5, -0.5) * baseMatrix * boneGeometryData->objectMatrix;
-	points[5] = MPoint(0.5, -0.5, 0.5) * taperMatrix * boneGeometryData->objectMatrix;
-	points[6] = MPoint(0.5, 0.5, 0.5) * taperMatrix * boneGeometryData->objectMatrix;
-	points[7] = MPoint(0.5, 0.5, -0.5) * taperMatrix * boneGeometryData->objectMatrix;
-	points[8] = MPoint(0.5, -0.5, -0.5) * taperMatrix * boneGeometryData->objectMatrix;
+	points[1] = MPoint(0.5, -0.5, 0.5) * baseMatrix * objectMatrix;
+	points[2] = MPoint(0.5, 0.5, 0.5) * baseMatrix * objectMatrix;
+	points[3] = MPoint(0.5, 0.5, -0.5) * baseMatrix * objectMatrix;
+	points[4] = MPoint(0.5, -0.5, -0.5) * baseMatrix * objectMatrix;
+	points[5] = MPoint(0.5, -0.5, 0.5) * taperMatrix * objectMatrix;
+	points[6] = MPoint(0.5, 0.5, 0.5) * taperMatrix * objectMatrix;
+	points[7] = MPoint(0.5, 0.5, -0.5) * taperMatrix * objectMatrix;
+	points[8] = MPoint(0.5, -0.5, -0.5) * taperMatrix * objectMatrix;
 
 	// Create mesh data
 	//
