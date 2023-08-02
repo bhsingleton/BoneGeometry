@@ -73,7 +73,9 @@ public:
 	virtual	MStatus				preEvaluation(const MDGContext& context, const MEvaluationNode& evaluationNode);
 	virtual	void				getCacheSetup(const MEvaluationNode& evaluationNode, MNodeCacheDisablingInfo& disablingInfo, MNodeCacheSetupInfo& cacheSetupInfo, MObjectArray& monitoredAttributes) const;
 
+	virtual	bool				getInternalValue(const MPlug& plug, MDataHandle& handle);
 	virtual	bool				setInternalValue(const MPlug& plug, const MDataHandle& handle);
+	virtual	void				copyInternalData(MPxNode* node);
 	virtual BoneGeometryData*	getUserData();
 
 	virtual	bool				isBounded() const;

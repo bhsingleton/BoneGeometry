@@ -295,16 +295,277 @@ Provide node-specific setup info for the Cached Playback system.
 };
 
 
-bool BoneGeometry::setInternalValue(const MPlug& plug, const MDataHandle& handle)
+bool BoneGeometry::getInternalValue(const MPlug& plug, MDataHandle& handle)
 /**
 This method is overridden by nodes that store attribute data in some internal format.
+The internal state of attributes can be set or queried using the setInternal and internal methods of MFnAttribute.
+When internal attribute values are queried via getAttr or MPlug::getValue this method is called.
+
+@param plug: The attribute that is being queried.
+@param handle: The data handle to store the attribute value.
+@return: The attribute was placed in the datablock.
+*/
+{
+
+	MStatus status;
+
+	// Evaluate attribute category
+	//
+	MObject attribute = plug.attribute(&status);
+	CHECK_MSTATUS_AND_RETURN_IT(status);
+
+	MFnAttribute fnAttribute(attribute, &status);
+	CHECK_MSTATUS_AND_RETURN_IT(status);
+
+	bool isLocalPosition = fnAttribute.hasCategory(BoneGeometry::localPositionCategory);
+	bool isLocalRotation = fnAttribute.hasCategory(BoneGeometry::localRotationCategory);
+	bool isLocalScale = fnAttribute.hasCategory(BoneGeometry::localScaleCategory);
+	bool isSize = fnAttribute.hasCategory(BoneGeometry::sizeCategory);
+	bool isSideFins = fnAttribute.hasCategory(BoneGeometry::sideFinsCategory);
+	bool isFrontFin = fnAttribute.hasCategory(BoneGeometry::frontFinCategory);
+	bool isBackFin = fnAttribute.hasCategory(BoneGeometry::backFinCategory);
+
+	if (isLocalPosition)
+	{
+
+		if (attribute == BoneGeometry::localPosition)
+		{
+
+			handle.setMVector(this->data->localPosition);
+
+		}
+		else if (attribute == BoneGeometry::localPositionX)
+		{
+
+			handle.setMDistance(MDistance(this->data->localPosition.x, MDistance::kCentimeters));
+
+		}
+		else if (attribute == BoneGeometry::localPositionY)
+		{
+
+			handle.setMDistance(MDistance(this->data->localPosition.y, MDistance::kCentimeters));
+
+		}
+		else if (attribute == BoneGeometry::localPositionZ)
+		{
+
+			handle.setMDistance(MDistance(this->data->localPosition.z, MDistance::kCentimeters));
+
+		}
+		else;
+
+		return true;
+
+	}
+	else if (isLocalRotation)
+	{
+
+		if (attribute == BoneGeometry::localRotate)
+		{
+
+			handle.setMVector(this->data->localRotate);
+
+		}
+		else if (attribute == BoneGeometry::localRotateX)
+		{
+
+			handle.setMAngle(MAngle(this->data->localRotate.x, MAngle::kRadians));
+
+		}
+		else if (attribute == BoneGeometry::localRotateY)
+		{
+
+			handle.setMAngle(MAngle(this->data->localRotate.y, MAngle::kRadians));
+
+		}
+		else if (attribute == BoneGeometry::localRotateZ)
+		{
+
+			handle.setMAngle(MAngle(this->data->localRotate.z, MAngle::kRadians));
+
+		}
+		else;
+
+		return true;
+
+	}
+	else if (isLocalScale)
+	{
+
+		if (attribute == BoneGeometry::localScale)
+		{
+
+			handle.setMVector(this->data->localScale);
+
+		}
+		else if (attribute == BoneGeometry::localScaleX)
+		{
+
+			handle.setMDistance(MDistance(this->data->localScale.x, MDistance::kCentimeters));
+
+		}
+		else if (attribute == BoneGeometry::localScaleY)
+		{
+
+			handle.setMDistance(MDistance(this->data->localScale.y, MDistance::kCentimeters));
+
+		}
+		else if (attribute == BoneGeometry::localScaleZ)
+		{
+
+			handle.setMDistance(MDistance(this->data->localScale.z, MDistance::kCentimeters));
+
+		}
+		else;
+
+		return true;
+
+	}
+	else if (isSize)
+	{
+
+		if (attribute == BoneGeometry::length)
+		{
+
+			handle.setDouble(this->data->length);
+
+		}
+		else if (attribute == BoneGeometry::width)
+		{
+
+			handle.setDouble(this->data->width);
+
+		}
+		else if (attribute == BoneGeometry::height)
+		{
+
+			handle.setDouble(this->data->height);
+
+		}
+		else if (attribute == BoneGeometry::taper)
+		{
+
+			handle.setDouble(this->data->taper);
+
+		}
+		else;
+
+		return true;
+
+	}
+	else if (isSideFins)
+	{
+
+		if (attribute == BoneGeometry::sideFins)
+		{
+
+			handle.setBool(this->data->sideFins);
+
+		}
+		else if (attribute == BoneGeometry::sideFinsSize)
+		{
+
+			handle.setDouble(this->data->sideFinsSize);
+
+		}
+		else if (attribute == BoneGeometry::sideFinsStartTaper)
+		{
+
+			handle.setDouble(this->data->sideFinsStartTaper);
+
+		}
+		else if (attribute == BoneGeometry::sideFinsEndTaper)
+		{
+
+			handle.setDouble(this->data->sideFinsEndTaper);
+
+		}
+		else;
+
+		return true;
+
+	}
+	else if (isFrontFin)
+	{
+
+		if (attribute == BoneGeometry::frontFin)
+		{
+
+			handle.setBool(this->data->frontFin);
+
+		}
+		else if (attribute == BoneGeometry::frontFinSize)
+		{
+
+			handle.setDouble(this->data->frontFinSize);
+
+		}
+		else if (attribute == BoneGeometry::frontFinStartTaper)
+		{
+
+			handle.setDouble(this->data->frontFinStartTaper);
+
+		}
+		else if (attribute == BoneGeometry::frontFinEndTaper)
+		{
+
+			handle.setDouble(this->data->frontFinEndTaper);
+
+		}
+		else;
+
+		return true;
+
+	}
+	else if (isBackFin)
+	{
+
+		if (attribute == BoneGeometry::backFin)
+		{
+
+			handle.setBool(this->data->backFin);
+
+		}
+		else if (attribute == BoneGeometry::backFinSize)
+		{
+
+			handle.setDouble(this->data->backFinSize);
+
+		}
+		else if (attribute == BoneGeometry::backFinStartTaper)
+		{
+
+			handle.setDouble(this->data->backFinStartTaper);
+
+		}
+		else if (attribute == BoneGeometry::backFinEndTaper)
+		{
+
+			handle.setDouble(this->data->backFinEndTaper);
+
+		}
+		else;
+
+		return true;
+
+	}
+	else;
+
+	return MPxLocatorNode::getInternalValue(plug, handle);
+
+};
+
+
+bool BoneGeometry::setInternalValue(const MPlug& plug, const MDataHandle& handle)
+/**
+This method is overridden by nodes that store attribute specs in some internal format.
 The internal state of attributes can be set or queried using the setInternal and internal methods of MFnAttribute.
 When internal attribute values are set via setAttr or MPlug::setValue this method is called.
 Another use for this method is to impose attribute limits.
 
 @param plug: The attribute that is being set.
-@param handle: The dataHandle containing the value to set.
-@return:
+@param handle: The data handle containing the value to set.
+@return: The attribute was handled internally.
 */
 {
 
@@ -325,7 +586,7 @@ Another use for this method is to impose attribute limits.
 	bool isSideFins = fnAttribute.hasCategory(BoneGeometry::sideFinsCategory);
 	bool isFrontFin = fnAttribute.hasCategory(BoneGeometry::frontFinCategory);
 	bool isBackFin = fnAttribute.hasCategory(BoneGeometry::backFinCategory);
-
+	
 	if (isLocalPosition)
 	{
 
@@ -356,6 +617,7 @@ Another use for this method is to impose attribute limits.
 		else;
 
 		this->data->dirtyObjectMatrix();
+		return true;
 
 	}
 	else if (isLocalRotation)
@@ -388,6 +650,7 @@ Another use for this method is to impose attribute limits.
 		else;
 
 		this->data->dirtyObjectMatrix();
+		return true;
 
 	}
 	else if (isLocalScale)
@@ -420,6 +683,7 @@ Another use for this method is to impose attribute limits.
 		else;
 
 		this->data->dirtyObjectMatrix();
+		return true;
 
 	}
 	else if (isSize)
@@ -451,6 +715,8 @@ Another use for this method is to impose attribute limits.
 		}
 		else;
 
+		return true;
+
 	}
 	else if (isSideFins)
 	{
@@ -480,6 +746,8 @@ Another use for this method is to impose attribute limits.
 
 		}
 		else;
+
+		return true;
 
 	}
 	else if (isFrontFin)
@@ -511,6 +779,8 @@ Another use for this method is to impose attribute limits.
 		}
 		else;
 
+		return true;
+
 	}
 	else if (isBackFin)
 	{
@@ -541,10 +811,29 @@ Another use for this method is to impose attribute limits.
 		}
 		else;
 
+		return true;
+
 	}
 	else;
 
 	return MPxLocatorNode::setInternalValue(plug, handle);
+
+};
+
+
+void BoneGeometry::copyInternalData(MPxNode* node)
+/**
+This method is overridden by nodes that store attribute data in some internal format.
+On duplication this method is called on the duplicated node with the node being duplicated passed as the parameter.
+Overriding this method gives your node a chance to duplicate any internal data you've been storing and manipulating outside of normal attribute data.
+
+@param node: The node that is being duplicated.
+@return: Void.
+*/
+{
+
+	BoneGeometry* boneGeometry = static_cast<BoneGeometry*>(node);
+	this->data = boneGeometry->getUserData();
 
 };
 
@@ -627,7 +916,7 @@ Use this function to define any static attributes.
 	MFnTypedAttribute fnTypedAttr;
 	MFnUnitAttribute fnUnitAttr;
 	MFnMatrixAttribute fnMatrixAttr;
-
+	
 	// Input attributes:
 	// Edit ".localPositionX" attribute
 	//
@@ -660,7 +949,7 @@ Use this function to define any static attributes.
 
 	CHECK_MSTATUS(fnNumericAttr.setInternal(true));
 	CHECK_MSTATUS(fnNumericAttr.addToCategory(BoneGeometry::localPositionCategory));
-
+	
 	// Define ".localRotateX" attribute
 	//
 	BoneGeometry::localRotateX = fnUnitAttr.create("localRotateX", "lorx", MFnUnitAttribute::kAngle, 0.0, &status);
